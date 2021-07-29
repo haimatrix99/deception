@@ -1,7 +1,6 @@
 import random
 import discord
 from discord.ext import commands
-from numpy import number
 from settings import *
 
 client = commands.Bot(command_prefix='$')
