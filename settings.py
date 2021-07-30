@@ -18,14 +18,19 @@ keys_hint = list(hint.keys())
 num_accomplice = 0
 num_witness = 0
 
-TOKEN = 'ODE4Mzc5MTIxMzMwNjE4NDQ4.YEXM8w.sp73aD2G0K93zhbG_Qqz5e3HWf0'
+TOKEN = 'ODE4Mzc5MTIxMzMwNjE4NDQ4.YEXM8w.z0PnenSLDlrOKoRuZiJ9CZ6hctI'
 
 NUM_CLUE = 200
 NUM_MEAN = 90
 
 NUMBERS = []
+
+global players
+players = 0
+
 name_players = []
 dict_players = {}
+
 num_accomplice = 0
 num_witness = 0
 
@@ -39,8 +44,8 @@ player_mean = []
 
 total_clue = []
 total_mean = []
-global list_id
 
+global list_id
 list_id = []
 class Cards:
     global clues, means, hints
@@ -140,7 +145,6 @@ shuffle_clue_deck = objShuffleCards.shuffle_clue()
 shuffle_mean_deck = objShuffleCards.shuffle_mean()
 shuffle_hint_deck = objShuffleCards.shuffle_hint()
 
-
 class Player:
     def __init__(self, role='', clue=[], mean=[], honor=1):
         self.role = role
@@ -149,14 +153,14 @@ class Player:
         self.hint = hint
         self.honor = honor
 
-def show_card(NUM_PLAYER, NUM_CARD = '4'):
+def show_card(player, num_card):
     player_clue = []
     player_mean = []
 
     total_clue = []
     total_mean = []
-    for _ in range(int(NUM_PLAYER)):
-        for _ in range(int(NUM_CARD)):
+    for _ in range(player):
+        for _ in range(int(num_card)):
             player_clue.append(objShuffleCards.popClue())
             player_mean.append(objShuffleCards.popMean())
         total_clue.append(player_clue)
@@ -191,6 +195,3 @@ def shuffle_number(num_player):
     NUMBERS = list(range(1,num_player + 1))
     shuffle(NUMBERS)
     return NUMBERS
-
-hints = show_hint()
-print(hints[0][0])

@@ -1,8 +1,8 @@
 import random
 import discord
-from discord import embeds
 from discord.ext import commands
 from settings import *
+from keep_alive import keep_alive
 
 client = commands.Bot(command_prefix='$', help_command= None)
 
@@ -36,10 +36,21 @@ async def on_command_error(ctx, error):
 
 @client.command()
 @commands.has_role('deception')
-async def card(ctx, *, NUM):
-    NUM_PLAYER, NUM_CARD = NUM.split(' ')
-    total_mean, total_clue = show_card(NUM_PLAYER, NUM_CARD)
-    for i in range(1, int(NUM_PLAYER) + 1):
+async def startgame(ctx, num_player):
+    global NUMBERS, players
+    players = int(num_player)
+    NUMBERS = list(range(1,int(num_player) + 1))
+    shuffle(NUMBERS)
+    if int(num_player) > 7:
+        await ctx.send(f"Game bắt đầu với {num_player} người chơi trong đó có: 1 Hung thủ, 1 Đồng phạm, 1 Nhân chứng và {int(num_player)-3} Điều tra viên")
+    else:
+        await ctx.send(f"Game bắt đầu với {num_player} người chơi trong đó có: 1 Hung thủ, 1 Nhân chứng và {int(num_player)-2} Điều tra viên")
+
+@client.command()
+@commands.has_role('deception')
+async def card(ctx, num_card):
+    total_mean, total_clue = show_card(players, int(num_card))
+    for i in range(1, players + 1):
         embed = discord.Embed(title = f"Player {i}", colour = discord.Color.red())
         embed.add_field(name = "Hung khí", value= "   -   ".join(s for s in total_mean[i-1]), inline= False)
         embed.add_field(name = "Manh mối", value= "   -   ".join(s for s in total_clue[i-1]), inline= False)
@@ -63,14 +74,30 @@ async def clue(ctx, *, locate):
 
 @client.command()
 @commands.has_role('deception')
-async def startgame(ctx, num_player):
-    global NUMBERS
-    NUMBERS = list(range(1,int(num_player) + 1))
-    shuffle(NUMBERS)
-    if int(num_player) > 7:
-        await ctx.send(f"Game bắt đầu với {num_player} người chơi trong đó có: 1 Hung thủ, 1 Đồng phạm, 1 Nhân chứng và {int(num_player)-3} Điều tra viên")
-    else:
-        await ctx.send(f"Game bắt đầu với {num_player} người chơi trong đó có: 1 Hung thủ, 1 Nhân chứng và {int(num_player)-2} Điều tra viên")
+async def murder(ctx):  
+    global num_murder
+    num_murder = random.choice(NUMBERS)
+    await ctx.send(f"Hung thủ là Player {num_murder}")
+    
+@client.command()
+@commands.has_role('deception')
+async def witness(ctx):  
+    global num_witness
+    while True:
+        num_witness = random.choice(NUMBERS)
+        if num_witness != num_murder:
+            break
+    await ctx.send(f"Nhân chứng là Player {num_witness}")
+
+@client.command()
+@commands.has_role('deception')
+async def accomplice(ctx):  
+    global num_accomplice
+    while True:
+        num_accomplice = random.choice(NUMBERS)
+        if num_accomplice != num_murder and num_accomplice != num_witness:
+            break
+    await ctx.send(f"Đồng phạm là Player {num_accomplice}")
 
 @client.command()
 @commands.has_role('Deception Player')
@@ -101,34 +128,6 @@ async def getnumber(ctx):
             await ctx.send("Bạn đã nhận số của mình rồi :3")
 
 @client.command()
-@commands.has_role('deception')
-async def murder(ctx):  
-    global num_murder
-    num_murder = random.choice(NUMBERS)
-    await ctx.send(f"Hung thủ là Player {num_murder}")
-    
-@client.command()
-@commands.has_role('deception')
-async def witness(ctx):  
-    global num_witness
-    while True:
-        num_witness = random.choice(NUMBERS)
-        if num_witness != num_murder:
-            break
-    await ctx.send(f"Nhân chứng là Player {num_witness}")
-
-@client.command()
-@commands.has_role('deception')
-async def accomplice(ctx):  
-    global num_accomplice
-    while True:
-        num_accomplice = random.choice(NUMBERS)
-        if num_accomplice != num_murder and num_accomplice != num_witness:
-            break
-    await ctx.send(f"Đồng phạm là Player {num_accomplice}")
-
-
-@client.command()
 async def select(ctx, arg1, arg2):
     if ctx.author.id == name_murder[-1]:
         global answer1, answer2
@@ -147,25 +146,6 @@ async def pick(ctx, player, mean, clue, role: discord.Role):
         await ctx.author.remove_roles(role)
 
 @client.command()
-async def help(ctx):
-    embed = discord.Embed(title = f"Help commands for player", colour = discord.Color.green())
-    embed.add_field(name = "getnumber", value = "Lệnh này cho player dùng để nhận số, khi nhận xong thì player sẽ nhận được message role của mình, Nếu là hung thủ thì sẽ xem bài và dùng lệnh để chọn hung khí và manh mối.")
-    embed.add_field(name = "pick", value= "Lệnh này để có thể vote ai là Hung thủ, nếu vote đúng thì sẽ Endgame chờ hung thủ lật kèo. còn sai thì sẽ k được vote lần nữa. VD: $pick 2 2 2 @Deception Player, Lưu ý phải tag role @Deception Player, cái này được tính như danh dự. Phải tag mới được tính. còn 2 2 2 kia sẽ là Player 2 là hung thủ với hung khí số 2 và manh mối số 2", inline= False)
-    embed.add_field(name = "select", value = "Lệnh dành cho ai làm hung thủ để chọn hung khí và manh mối. VD: $select 2 2 là chọn hung khí số 2 và manh mối số 2.")
-    await ctx.send(embed = embed)
-
-@client.command()
-@commands.has_role('deception')
-async def helpmoderator(ctx):
-    embed = discord.Embed(title = f"Help commands for moderator", colour = discord.Color.green())
-    embed.add_field(name = "card", value="Dùng để phát bài cho player. VD: $card 2 2, có nghĩa là chia bài cho 2 player trong đó mỗi player có 2 lá hung khí và 2 lá manh mối")
-    embed.add_field(name = "clue", value = "Dùng để hiển thị hint cho player. Lưu ý nó chỉ hiển thị có những lá hint gì, Quản trò vẫn phải đưa ra hint củ thể cho player biết bằng lệnh khác. Có 4 lá hiện trường và quản trò có quyền lựa chọn. VD: $clue 1 ,Có nghĩa là chọn lá hiện trường 1", inline= False)
-    embed.add_field(name = "murder",value = "Lệnh của quản trò để random murder trong tất cả players", inline=False)
-    embed.add_field(name = "witness",value = "Lệnh của quản trò để random witness trong tất cả players. Lưu ý phải roll Murder trước",inline=False)
-    embed.add_field(name = "accomplice",value = "Lệnh của quản trò để random accomplce trong tất cả players, nếu player < 7 thì k dùng lệnh này",inline=False)
-    await ctx.send(embed = embed)
-
-@client.command()
 @commands.has_role('deception')
 async def moderatorselect(ctx,arg1,arg2,arg3,arg4,arg5,arg6):
     embed = discord.Embed(title = "Hint from Moderator", colour = discord.Color.red())
@@ -177,4 +157,27 @@ async def moderatorselect(ctx,arg1,arg2,arg3,arg4,arg5,arg6):
     embed.add_field(name = hints[3][0], value = hints[3][int(arg6)],inline= False)   
     await ctx.send(embed = embed)
 
+@client.command()
+async def help(ctx):
+    embed = discord.Embed(title = f"Help commands for player", colour = discord.Color.green())
+    embed.add_field(name = "getnumber", value = "Lệnh này cho player dùng để nhận số, khi nhận xong thì player sẽ nhận được message role của mình, Nếu là hung thủ thì sẽ xem bài và dùng lệnh để chọn hung khí và manh mối.")
+    embed.add_field(name = "pick", value= "Lệnh này để có thể vote ai là Hung thủ, nếu vote đúng thì sẽ Endgame chờ hung thủ lật kèo. còn sai thì sẽ k được vote lần nữa. VD: $pick 2 2 2 @Deception Player, Lưu ý phải tag role @Deception Player, cái này được tính như danh dự. Phải tag mới được tính. còn 2 2 2 kia sẽ là Player 2 là hung thủ với hung khí số 2 và manh mối số 2", inline= False)
+    embed.add_field(name = "select", value = "Lệnh dành cho ai làm hung thủ để chọn hung khí và manh mối. VD: $select 2 2 là chọn hung khí số 2 và manh mối số 2.")
+    await ctx.send(embed = embed)
+
+@client.command()
+@commands.has_role('deception')
+async def helpmoderator(ctx):
+    embed = discord.Embed(title = f"Help commands for moderator", colour = discord.Color.green())
+    embed.add_field(name = "startgame", value = "Dùng để bắt đầu game với số player. VD: $startgame 5, bắt đầu game với 5 player.")
+    embed.add_field(name = "card", value="Dùng để phát bài cho player. VD: $card 2, có nghĩa là chia bài trong đó mỗi player có 2 lá hung khí và 2 lá manh mối, 3 đối với game dễ, 4 là bình thường, 5 là game khó.")
+    embed.add_field(name = "clue", value = "Dùng để hiển thị hint cho player. Lưu ý nó chỉ hiển thị có những lá hint gì, Quản trò vẫn phải đưa ra hint củ thể cho player biết bằng lệnh khác. Có 4 lá hiện trường và quản trò có quyền lựa chọn. VD: $clue 1 ,Có nghĩa là chọn lá hiện trường 1", inline= False)
+    embed.add_field(name = "murder",value = "Lệnh của quản trò để random murder trong tất cả players", inline=False)
+    embed.add_field(name = "witness",value = "Lệnh của quản trò để random witness trong tất cả players. Lưu ý phải roll Murder trước",inline=False)
+    embed.add_field(name = "accomplice",value = "Lệnh của quản trò để random accomplce trong tất cả players, nếu player < 7 thì k dùng lệnh này",inline=False)
+    embed.add_field(name = "moderatorselect", value = "Lệnh dùng để chọn vị trí các viên đạn trong các hint đưa ở trên. VD: $moderatorselect 2 2 2 2 2 2, có nghĩa là đặt 6 viên đạn ở hàng 2 của 6 thẻ.")
+    embed.add_field(name = "reset", value = "Lệnh dùng khi chơi xong 1 game.")
+    await ctx.send(embed = embed)
+
 client.run(TOKEN)
+
