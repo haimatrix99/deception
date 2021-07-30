@@ -15,13 +15,21 @@ hint = hint_data.to_dict()
 
 keys_hint = list(hint.keys())
 
-GUILD = '818379121330618448'
-TOKEN = 'ODE4Mzc5MTIxMzMwNjE4NDQ4.YEXM8w.vT1e1jeC7fSFq_PHXij8wX8Udrw'
+num_accomplice = 0
+num_witness = 0
+
+TOKEN = 'ODE4Mzc5MTIxMzMwNjE4NDQ4.YEXM8w.sp73aD2G0K93zhbG_Qqz5e3HWf0'
 
 NUM_CLUE = 200
 NUM_MEAN = 90
 
 NUMBERS = []
+name_players = []
+dict_players = {}
+num_accomplice = 0
+num_witness = 0
+
+name_murder = []
 
 clue = np.reshape(clue_data.to_numpy(), (1, NUM_CLUE))
 mean = np.reshape(mean_data.to_numpy(), (1, NUM_MEAN))
@@ -31,7 +39,9 @@ player_mean = []
 
 total_clue = []
 total_mean = []
+global list_id
 
+list_id = []
 class Cards:
     global clues, means, hints
     clues = clue[0]
@@ -182,4 +192,5 @@ def shuffle_number(num_player):
     shuffle(NUMBERS)
     return NUMBERS
 
-
+hints = show_hint()
+print(hints[0][0])
