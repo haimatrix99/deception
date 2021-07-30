@@ -1,10 +1,11 @@
 import random
 import discord
+from discord import user
 from discord.ext import commands
+from discord.utils import get
 from settings import *
-from keep_alive import keep_alive
 
-client = commands.Bot(command_prefix='$', help_command= None)
+client = commands.Bot(command_prefix='$', help_command= None )
 
 @client.event
 async def on_ready():
@@ -27,12 +28,14 @@ async def reset(ctx):
     objShuffleCards.shuffle_mean()
     objShuffleCards.shuffle_hint()
     list_id.clear()
+    name_murder.clear()
     await ctx.send("Reset Card")
 
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have the correct role for this command.')
+
 
 @client.command()
 @commands.has_role('deception')
@@ -58,7 +61,7 @@ async def card(ctx, num_card):
 
 @client.command()
 @commands.has_role('deception')
-async def clue(ctx, *, locate):
+async def clue(ctx, locate):
     global cause_of_death
     cause_of_death = show_death()
     global location_choice
@@ -100,11 +103,11 @@ async def accomplice(ctx):
     await ctx.send(f"Đồng phạm là Player {num_accomplice}")
 
 @client.command()
-@commands.has_role('Deception Player')
+@commands.has_role('Deception player')
 async def getnumber(ctx):
     if len(NUMBERS) == 0:
         await ctx.send("Hì")
-    else:
+    elif len(NUMBERS) != 0 and num_murder != 0 and num_witness != 0 or num_accomplice!= 0:
         if ctx.author.id not in list_id:
             num_player = NUMBERS.pop()
             if num_player == num_murder:
@@ -137,13 +140,15 @@ async def select(ctx, arg1, arg2):
     else: await ctx.send("Bạn không phải là hung thủ nên không thể chọn hung khí và manh mối.")
 
 @client.command()
-@commands.has_role('Deception Player')
-async def pick(ctx, player, mean, clue, role: discord.Role):
-    if mean == str(answer1) and clue == str(answer2) and player == str(num_murder):
-        await ctx.send(f"{ctx.author.name} đã chọn Player {player} là hung thủ với hung khí số {answer1} và manh mối số {answer2}\nKết quả cuối cùng là chính xác, Congrats!.")
+@commands.has_role('Deception player')
+async def pick(ctx, player, mean, clue):
+    member = ctx.author
+    role = get(ctx.guild.roles, name = "Deception player")
+    if mean == answer1 and clue == answer2 and player == str(num_murder):
+        await ctx.send(f"{ctx.author.name} đã chọn Player {player} là hung thủ với hung khí số {mean} và manh mối số {clue}\nKết quả cuối cùng là chính xác, Congrats!.")
     else:
-        await ctx.send(f"{ctx.author.name} đã chọn Player {player} là hung thủ với hung khí số {answer1} và manh mối số {answer2}\nKết quả là sai. Player {ctx.author.name} đã mất danh dự của mình không thể vote lần nữa những vẫn có quyền thảo luận.")
-        await ctx.author.remove_roles(role)
+        await ctx.send(f"{ctx.author.name} đã chọn Player {player} là hung thủ với hung khí số {mean} và manh mối số {clue}\nKết quả là sai. Player {ctx.author.name} đã mất danh dự của mình không thể vote lần nữa những vẫn có quyền thảo luận.")
+        await member.remove_roles(role, atomic=False)
 
 @client.command()
 @commands.has_role('deception')
@@ -178,6 +183,22 @@ async def helpmoderator(ctx):
     embed.add_field(name = "moderatorselect", value = "Lệnh dùng để chọn vị trí các viên đạn trong các hint đưa ở trên. VD: $moderatorselect 2 2 2 2 2 2, có nghĩa là đặt 6 viên đạn ở hàng 2 của 6 thẻ.")
     embed.add_field(name = "reset", value = "Lệnh dùng khi chơi xong 1 game.")
     await ctx.send(embed = embed)
+@client.command()
+async def play(message):
+    member = message.author
+    role = get(message.guild.roles, name = "Deception player")
+    if role in member.roles:
+        await message.send("Bạn đã ở trong game rồi!")
+    else:
+        await member.add_roles(role, atomic=False)
+        await message.send(f"{member.name} đã tham gia vào game!")
 
+@client.command()
+async def remove(message):
+    member = message.author
+    role = get(message.guild.roles, name = "Deception player")
+    await member.remove_roles(role, atomic=False)
+    await message.send(f"{member.name} đã rời khỏi game!")
 client.run(TOKEN)
+
 

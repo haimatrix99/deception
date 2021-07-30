@@ -18,7 +18,7 @@ keys_hint = list(hint.keys())
 num_accomplice = 0
 num_witness = 0
 
-TOKEN = 'ODE4Mzc5MTIxMzMwNjE4NDQ4.YEXM8w.z0PnenSLDlrOKoRuZiJ9CZ6hctI'
+# TOKEN = 'aODE4Mzc5MTIxMzMwNjE4NDQ4.YEXM8w.20k9NXBJ_ahBz0jSdkLri9FD4jM'
 
 NUM_CLUE = 200
 NUM_MEAN = 90
