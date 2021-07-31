@@ -1,5 +1,4 @@
 from random import shuffle
-import random
 import pandas as pd
 import numpy as np
 
@@ -15,22 +14,29 @@ hint = hint_data.to_dict()
 
 keys_hint = list(hint.keys())
 
-num_accomplice = 0
-num_witness = 0
-
-# TOKEN = 'aODE4Mzc5MTIxMzMwNjE4NDQ4.YEXM8w.20k9NXBJ_ahBz0jSdkLri9FD4jM'
 
 NUM_CLUE = 200
 NUM_MEAN = 90
+NUM_HINT = 21
 
 NUMBERS = []
 
 global players
 players = 0
 
+global list_id
+list_id = []
+
+global list_player_id
+list_player_id = []
+
+global kick
+kick = False
+
 name_players = []
 dict_players = {}
 
+num_murder=0
 num_accomplice = 0
 num_witness = 0
 
@@ -41,12 +47,9 @@ mean = np.reshape(mean_data.to_numpy(), (1, NUM_MEAN))
 
 player_clue = []
 player_mean = []
-
 total_clue = []
 total_mean = []
 
-global list_id
-list_id = []
 class Cards:
     global clues, means, hints
     clues = clue[0]
@@ -86,21 +89,21 @@ class ShuffleCards(Deck):
 
     # Method to shuffle cards
     def shuffle_clue(self):
-        if len(self.myclueset) < 200:
+        if len(self.myclueset) < NUM_CLUE:
             print("cannot shuffle the cards")
         else:
             shuffle(self.myclueset)
             return self.myclueset
 
     def shuffle_mean(self):
-        if len(self.mymeanset) < 90:
+        if len(self.mymeanset) < NUM_MEAN:
             print("cannot shuffle the cards")
         else:
             shuffle(self.mymeanset)
             return self.mymeanset
 
     def shuffle_hint(self):
-        if len(self.mymeanset) < 21:
+        if len(self.mymeanset) < NUM_HINT:
             print("cannot shuffle the cards")
         else:
             shuffle(self.myhintset)
