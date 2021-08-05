@@ -14,11 +14,13 @@ hint = hint_data.to_dict()
 
 keys_hint = list(hint.keys())
 
+TOKEN = ''
 
 NUM_CLUE = 200
 NUM_MEAN = 90
 NUM_HINT = 21
 
+global NUMBERS
 NUMBERS = []
 
 global players
@@ -33,10 +35,16 @@ list_player_id = []
 global kick
 kick = False
 
-name_players = []
-dict_players = {}
+global isselect
+isselect = False
 
-num_murder=0
+global isfound
+isfond = False
+global ispick
+ispick = False
+
+global num_murder, num_accomplice, num_witness
+num_murder = 0
 num_accomplice = 0
 num_witness = 0
 
@@ -50,6 +58,7 @@ player_mean = []
 total_clue = []
 total_mean = []
 
+
 class Cards:
     global clues, means, hints
     clues = clue[0]
@@ -58,6 +67,7 @@ class Cards:
 
     def __init__(self):
         pass
+
 
 class Deck(Cards):
     def __init__(self):
@@ -141,12 +151,14 @@ class ShuffleCards(Deck):
         for n in hints:
             self.myhintset.append(n)
 
+
 objCards = Cards()
 objDeck = Deck()
 objShuffleCards = ShuffleCards()
 shuffle_clue_deck = objShuffleCards.shuffle_clue()
 shuffle_mean_deck = objShuffleCards.shuffle_mean()
 shuffle_hint_deck = objShuffleCards.shuffle_hint()
+
 
 class Player:
     def __init__(self, role='', clue=[], mean=[], honor=1):
@@ -155,6 +167,7 @@ class Player:
         self.mean = mean
         self.hint = hint
         self.honor = honor
+
 
 def show_card(player, num_card):
     player_clue = []
@@ -183,18 +196,31 @@ def show_hint():
         hint_show.append(hints)
     return hint_show
 
+
 def show_death():
     cause_of_death = pd.DataFrame(death_data).values
     cause_of_death = np.reshape(cause_of_death, (1, 7))
     cause_of_death = cause_of_death[0]
     return cause_of_death
 
+
 def show_location(choice):
     location_of_crime = []
     location_of_crime = pd.Series(location_data[choice]).values
     return location_of_crime
 
+
 def shuffle_number(num_player):
-    NUMBERS = list(range(1,num_player + 1))
+    NUMBERS = list(range(1, num_player + 1))
     shuffle(NUMBERS)
     return NUMBERS
+
+
+def locations():
+    locations = []
+    for i in range(1, 5):
+        locate = []
+        for j in range(1, 7):
+            locate.append(location[str(i)][j])
+        locations.append(locate)
+    return locations
